@@ -180,7 +180,7 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
                                             "Whether or not to randomize map chips");
 
 
-        Harmony.CreateAndPatchAll(typeof(Plugin));
+        Harmony.CreateAndPatchAll(typeof(NineSolsRandomizerPlugin));
         //Harmony.CreateAndPatchAll(typeof(ShopUIPanel_PatchClass));
 
 
