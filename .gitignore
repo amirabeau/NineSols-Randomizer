@@ -1,0 +1,10 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/
+/bin/
+/obj/
+/lib/Assembly-CSharp.dll
+/lib/rcg.rcgmakercore.Runtime.dll
+/lib/Sirenix.OdinInspector.Attributes.dll
