@@ -12,6 +12,8 @@ using static RCGFSM.Items.ItemGetUIShowAction;
 using UnityEngine;
 using RCGMaker.AddressableAssets;
 using static MerchandiseData;
+using RCGMaker.Core;
+using System.Drawing;
 
 namespace NineSolsRandomizer;
 
@@ -306,14 +308,13 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
         {
             __result = !(flagDict[HelperFlags["berserkflag_unboundedcounter"]] as ScriptableDataBool).CurrentValue;
         }
-        else if (__instance.BindingTeleportPoint.FinalSaveID == HelperFlags["teleport_pavillion"])
-        {
-            if (__instance.CurrentTutorial() == __instance.berserkBindingTutorials[2])
-            {
-                __result = !(flagDict[HelperFlags["berserkflag_cloudleap"]] as ScriptableDataBool).CurrentValue
-                && (flagDict[HelperFlags["solseal_ladyethereal"]] as GameFlagDescriptable).unlocked.CurrentValue;
-            }
-        }
+        //else if (__instance.BindingTeleportPoint.FinalSaveID == HelperFlags["teleport_pavillion"])
+        //{
+        //    __result = !(flagDict[HelperFlags["ability_fusanghorn"]] as GameFlagDescriptable).unlocked.CurrentValue;
+
+        //    __result |= !(flagDict[HelperFlags["berserkflag_cloudleap"]] as ScriptableDataBool).CurrentValue
+        //        && (flagDict[HelperFlags["solseal_ladyethereal"]] as GameFlagDescriptable).unlocked.CurrentValue;
+        //}
     }
 
 
@@ -329,6 +330,9 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
             Debug.LogError("No Teleport Point?", __instance);
             return false;
         }
+
+        Logger.LogInfo("Sitting at node: " + __instance.BindingTeleportPoint.FinalSaveID + " isBerserk:" +  __instance.shouldEnterBerserk);
+
         __instance.BindingTeleportPoint.unlocked.CurrentValue = true;
         SingletonBehaviour<GameCore>.Instance.SetReviveSavePoint(__instance.BindingTeleportPoint);
         if (!__instance.shouldEnterBerserk)
@@ -347,33 +351,37 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
         else if (__instance.BindingTeleportPoint.FinalSaveID == HelperFlags["teleport_chargestrike"])
         {
             UnlockItemWithPopup(GetMappedItem(HelperFlags["ability_chargestrike"]));
-            (flagDict[HelperFlags["berserkflag_taichikick"]] as ScriptableDataBool).CurrentValue = true;
+            (flagDict[HelperFlags["berserkflag_chargestrike"]] as ScriptableDataBool).CurrentValue = true;
         }
         else if (__instance.BindingTeleportPoint.FinalSaveID == HelperFlags["teleport_airdash"])
         {
             UnlockItemWithPopup(GetMappedItem(HelperFlags["ability_airdash"]));
-            (flagDict[HelperFlags["berserkflag_taichikick"]] as ScriptableDataBool).CurrentValue = true;
+            (flagDict[HelperFlags["berserkflag_airdash"]] as ScriptableDataBool).CurrentValue = true;
         }
         else if (__instance.BindingTeleportPoint.FinalSaveID == HelperFlags["teleport_unboundedcounter"])
         {
             UnlockItemWithPopup(GetMappedItem(HelperFlags["ability_unboundedcounter"]));
-            (flagDict[HelperFlags["berserkflag_taichikick"]] as ScriptableDataBool).CurrentValue = true;
+            (flagDict[HelperFlags["berserkflag_unboundedcounter"]] as ScriptableDataBool).CurrentValue = true;
         }
-        else if (__instance.BindingTeleportPoint.FinalSaveID == HelperFlags["teleport_pavillion"])
-        {
-            if (__instance.CurrentTutorial() == __instance.berserkBindingTutorials[0])
-            {
-                UnlockItemWithPopup(flagDict[HelperFlags["ability_fusanghorn"]] as GameFlagDescriptable);
+        //else if (__instance.BindingTeleportPoint.FinalSaveID == HelperFlags["teleport_pavillion"])
+        //{
+            //if (!(flagDict[HelperFlags["ability_fusanghorn"]] as GameFlagDescriptable).unlocked.CurrentValue)
+            //{
+            //    Logger.LogInfo("Trying to unlock Fusang horn");
 
-                //QoL: Unlock Teleport as soon as you get fusang horn
-                (flagDict[HelperFlags["ability_teleport"]] as GameFlagDescriptable).PlayerPicked();
-            }
-            else if (__instance.CurrentTutorial() == __instance.berserkBindingTutorials[2])
-            {
-                UnlockItemWithPopup(GetMappedItem(HelperFlags["ability_cloudleap"]));
-                (flagDict[HelperFlags["berserkflag_taichikick"]] as ScriptableDataBool).CurrentValue = true;
-            }
-        }
+            //    //UnlockItemWithPopup(flagDict[HelperFlags["ability_fusanghorn"]] as GameFlagDescriptable);
+
+            //    //QoL: Unlock Teleport as soon as you get fusang horn
+            //    (flagDict[HelperFlags["ability_teleport"]] as GameFlagDescriptable).PlayerPicked();
+
+            //    return true;
+            //}
+            //else
+            //{
+            //    UnlockItemWithPopup(GetMappedItem(HelperFlags["ability_cloudleap"]));
+            //    (flagDict[HelperFlags["berserkflag_cloudleap"]] as ScriptableDataBool).CurrentValue = true;
+            //}
+        //}
 
         //Trigger normal sitting animation instead of tutorial
         __instance.myAnimator.Play("SP_opening");
@@ -383,22 +391,30 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
         return false;
     }
 
-    //Swap items in the shop after it's initialized
-    [HarmonyPatch(typeof(UICollectionView<MerchandiseDataCollection, MerchandiseData>), "AwakeInit")]
-    [HarmonyPostfix]
-    static void ShopUIPanel_ShowInit_Hook(UICollectionView<MerchandiseDataCollection, MerchandiseData> __instance)
+    //Swap items in the shop
+    [HarmonyPatch(typeof(ShopUIPanel), "ShowInit")]
+    [HarmonyPrefix]
+    static void ShopUIPanel_ShowInit_Hook(ShopUIPanel __instance)
     {
-        if (__instance.allCollection is MerchandiseDataCollection merchandiseCollection)
+        //HACK: Only want to shuffle the items around the first time we call this hook for a shop
+        //      currentIndex is -1 the first time we access it but will be set to a valid index next time we enter
+        int currentIndex = Traverse.Create(__instance.allCollection).Field("_currentIndex").GetValue<int>();
+        if (currentIndex == -1)
         {
-            foreach (var shopItem in merchandiseCollection.gameFlagDataList)
+            if (__instance.GetType().ToString() == "ShopUIPanel" && __instance.allCollection is MerchandiseDataCollection merchandiseCollection)
             {
-                if (((int)shopItem.merchandiseType == 0 || (int)shopItem.merchandiseType == 2))
+                //Restore default items and replace with random targets because we don't know if this is our first time opening the menu or not
+                __instance.GetComponentsInChildren(__instance.buttonViews);
+
+                foreach (var shopItem in merchandiseCollection.gameFlagDataList)
                 {
-                    if (!(shopItem.item is null) && IsRandomizedItem(shopItem.item))
+                    if (((int)shopItem.merchandiseType == 0 || (int)shopItem.merchandiseType == 2))
                     {
-                        Logger.LogInfo("Replacing shop item " + shopItem.item.FinalSaveID + " with " + GetMappedItem(shopItem.item).FinalSaveID);
-                        shopItem.item = GetMappedItem(shopItem.item);
-                        Logger.LogInfo("Description: " + shopItem.Description);
+                        if (!(shopItem.item is null) && IsRandomizedItem(shopItem.item))
+                        {
+                            Logger.LogInfo("Replacing shop item " + shopItem.item.FinalSaveID + " with " + GetMappedItem(shopItem.item).FinalSaveID);
+                            shopItem.item = GetMappedItem(shopItem.item);
+                        }
                     }
                 }
             }
@@ -432,6 +448,38 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
                 // Replace with description from item as we've already randomized it
                 __result = __instance.item.Description;
             }
+        }
+    }
+
+
+    ////QoL: Activate primordial root node even if the power is off in the pavillion
+    //[HarmonyPatch(typeof(AbstractStateTransition), "TransitionConditionValid", MethodType.Getter)]
+    //[HarmonyPostfix]
+    //static void AbstractStateTransition_TransitionConditionValid_Hook(AbstractStateTransition __instance, ref bool __result)
+    //{
+    //    Logger.LogInfo("Checking transition condition: " + __instance.name + " " + __instance.GetInstanceID());
+    //    if (__instance.name == "[Transition] 第一次爆走")
+    //    {
+    //        var conditions = Traverse.Create(__instance).Field("conditions").GetValue() as AbstractConditionComp[];
+    //        Logger.LogInfo("Overriding transition condition: " + __instance.name);
+    //        __result = conditions[0].FinalResult;
+    //    }
+    //    else if (__instance.name == "[Transition] 沒電")
+    //    {
+    //        __result = false;
+    //        Logger.LogInfo("Overriding transition condition: " + __instance.name);
+    //    }
+    //}
+
+    // QoL: Activate primordial root node even if the power is off in the pavillion
+    [HarmonyPatch(typeof(VariableBool), "FlagValue", MethodType.Getter)]
+    [HarmonyPostfix]
+    static void AbstractStateTransition_TransitionConditionValid_Hook(VariableBool __instance, ref bool __result)
+    {
+        if (__instance.name == "[Variable] 議會有電嗎")
+        {
+            __result = true;
+            Logger.LogInfo("Overriding variable bool");
         }
     }
 }

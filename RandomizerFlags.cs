@@ -227,7 +227,7 @@ namespace NineSolsRandomizer
                 {"ability_unboundedcounter", "2acc3bde8c965465bbb04a339abbbb16TeleportPointData"},
                 {"berserkflag_unboundedcounter", "8e8f9d2c-8420-4056-8bef-256d981ca747_d9471a64dd55c486bbe604ae326ac961ScriptableDataBool"},
 
-                {"teleport_pavillion", "2acc3bde8c965465bbb04a339abbbb16TeleportPointData"},
+                {"teleport_pavillion", "9115d3446fcc24abab2c0030d55abd1eTeleportPointData"},
                 {"ability_cloudleap", "827cb8277cd144d83861460103607ed7SkillNodeData"},
                 {"berserkflag_cloudleap", "8be2b95b-1b1c-443f-80d3-f488ecb52145_3cf7cd9b3e2c840af8ec10763a0c7fceScriptableDataBool"},
                 {"ability_fusanghorn", "f6ddb914baaea4c11a4b995145dbbaadItemData"},
