@@ -200,11 +200,22 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
 
 
     [HarmonyPatch(typeof(ItemData), "PlayerPicked")]
-    [HarmonyPrefix]
+    [HarmonyPostfix]
     static void LogPlayerPicked(ItemData __instance)
     {
         Logger.LogInfo("Player Picked item: " + __instance.Title);
         Logger.LogInfo(System.Environment.StackTrace);
+
+        if (__instance.FinalSaveID == HelperFlags["ability_fusanghorn"])
+        {
+            //QoL: enable teleport ability when unlocking Fusang Horn
+            var teleportAbilityFlag = flagDict[HelperFlags["ability_teleport"]] as GameFlagDescriptable;
+            if (!teleportAbilityFlag.unlocked.CurrentValue)
+            {
+                Logger.LogInfo("Player got Fusang Horn. Unlocking Teleport");
+                teleportAbilityFlag.PlayerPicked();
+            }
+        }
     }
 
     // Swap received items for cutscenes
@@ -308,13 +319,6 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
         {
             __result = !(flagDict[HelperFlags["berserkflag_unboundedcounter"]] as ScriptableDataBool).CurrentValue;
         }
-        //else if (__instance.BindingTeleportPoint.FinalSaveID == HelperFlags["teleport_pavillion"])
-        //{
-        //    __result = !(flagDict[HelperFlags["ability_fusanghorn"]] as GameFlagDescriptable).unlocked.CurrentValue;
-
-        //    __result |= !(flagDict[HelperFlags["berserkflag_cloudleap"]] as ScriptableDataBool).CurrentValue
-        //        && (flagDict[HelperFlags["solseal_ladyethereal"]] as GameFlagDescriptable).unlocked.CurrentValue;
-        //}
     }
 
 
@@ -363,25 +367,6 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
             UnlockItemWithPopup(GetMappedItem(HelperFlags["ability_unboundedcounter"]));
             (flagDict[HelperFlags["berserkflag_unboundedcounter"]] as ScriptableDataBool).CurrentValue = true;
         }
-        //else if (__instance.BindingTeleportPoint.FinalSaveID == HelperFlags["teleport_pavillion"])
-        //{
-            //if (!(flagDict[HelperFlags["ability_fusanghorn"]] as GameFlagDescriptable).unlocked.CurrentValue)
-            //{
-            //    Logger.LogInfo("Trying to unlock Fusang horn");
-
-            //    //UnlockItemWithPopup(flagDict[HelperFlags["ability_fusanghorn"]] as GameFlagDescriptable);
-
-            //    //QoL: Unlock Teleport as soon as you get fusang horn
-            //    (flagDict[HelperFlags["ability_teleport"]] as GameFlagDescriptable).PlayerPicked();
-
-            //    return true;
-            //}
-            //else
-            //{
-            //    UnlockItemWithPopup(GetMappedItem(HelperFlags["ability_cloudleap"]));
-            //    (flagDict[HelperFlags["berserkflag_cloudleap"]] as ScriptableDataBool).CurrentValue = true;
-            //}
-        //}
 
         //Trigger normal sitting animation instead of tutorial
         __instance.myAnimator.Play("SP_opening");
@@ -451,25 +436,17 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
         }
     }
 
-
-    ////QoL: Activate primordial root node even if the power is off in the pavillion
-    //[HarmonyPatch(typeof(AbstractStateTransition), "TransitionConditionValid", MethodType.Getter)]
-    //[HarmonyPostfix]
-    //static void AbstractStateTransition_TransitionConditionValid_Hook(AbstractStateTransition __instance, ref bool __result)
-    //{
-    //    Logger.LogInfo("Checking transition condition: " + __instance.name + " " + __instance.GetInstanceID());
-    //    if (__instance.name == "[Transition] 第一次爆走")
-    //    {
-    //        var conditions = Traverse.Create(__instance).Field("conditions").GetValue() as AbstractConditionComp[];
-    //        Logger.LogInfo("Overriding transition condition: " + __instance.name);
-    //        __result = conditions[0].FinalResult;
-    //    }
-    //    else if (__instance.name == "[Transition] 沒電")
-    //    {
-    //        __result = false;
-    //        Logger.LogInfo("Overriding transition condition: " + __instance.name);
-    //    }
-    //}
+    //QoL: Activate primordial root node even if the power is off in the pavillion
+    [HarmonyPatch(typeof(GameFlagPropertyCondition), "isValid", MethodType.Getter)]
+    [HarmonyPostfix]
+    static void AbstractStateTransition_TransitionConditionValid_Hook(GameFlagPropertyCondition __instance, ref bool __result)
+    {
+        if (__instance.name == "[Condition]有電")
+        {
+            __result = true;
+            Logger.LogInfo("Overriding transition condition");
+        }
+    }
 
     // QoL: Activate primordial root node even if the power is off in the pavillion
     [HarmonyPatch(typeof(VariableBool), "FlagValue", MethodType.Getter)]
