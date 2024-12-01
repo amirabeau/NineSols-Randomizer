@@ -181,7 +181,6 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
 
 
         Harmony.CreateAndPatchAll(typeof(NineSolsRandomizerPlugin));
-        //Harmony.CreateAndPatchAll(typeof(ShopUIPanel_PatchClass));
 
 
         HelperFlags = RandomizerFlags.GetHelperFlags();
