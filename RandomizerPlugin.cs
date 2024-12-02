@@ -42,6 +42,7 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
     private ConfigEntry<bool> randomizePoisons;
     private ConfigEntry<bool> randomizeEncyclopedia;
     private ConfigEntry<bool> randomizeMapChips;
+    private ConfigEntry<bool> randomizeRecyclables;
 
 
     private void GenerateRandomSettings(int seed)
@@ -74,6 +75,10 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
                 enabledRandomizerItems.Add(item);
             }
             else if (randomizeMapChips.Value && item.type == ItemType.MapChips)
+            {
+                enabledRandomizerItems.Add(item);
+            }
+            else if (randomizeRecyclables.Value && item.type == ItemType.Recyclables)
             {
                 enabledRandomizerItems.Add(item);
             }
@@ -142,8 +147,8 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
         Logger = base.Logger;
         Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
 
-        Seed = Config.Bind("RandomSeed", "Seed", 0, "Seed used for randomization");
-        UseFixedSeed = Config.Bind("RandomSeed", "UseFixedSeed", true, "If true, the value from Seed will be used. Otherwise a random seed is picked when starting a new save.");
+        Seed = Config.Bind("RandomSeed", "Seed", 3, "Seed that will be used to randomize items. With all settings turned on, default value of 3 will result in a layout beatable without glitches.");
+        UseFixedSeed = Config.Bind("RandomSeed", "UseFixedSeed", true, "If true, the value from Seed will be used. [option for random seed not implemented yet]");
 
 
         randomizeAbilities = Config.Bind("RandomizerSettings",
@@ -180,6 +185,11 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
                                             "RandomizeMapChips",
                                             true,
                                             "Whether or not to randomize map chips");
+
+        randomizeRecyclables = Config.Bind("RandomizerSettings",
+                                            "RandomizeRecyclables",
+                                            true,
+                                            "Whether or not to randomize recyclable items");
 
 
         Harmony.CreateAndPatchAll(typeof(NineSolsRandomizerPlugin));
@@ -451,12 +461,20 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
     // QoL: Activate primordial root node even if the power is off in the pavillion
     [HarmonyPatch(typeof(VariableBool), "FlagValue", MethodType.Getter)]
     [HarmonyPostfix]
-    static void AbstractStateTransition_TransitionConditionValid_Hook(VariableBool __instance, ref bool __result)
+    static void VariableBool_FlagValue_Hook(VariableBool __instance, ref bool __result)
     {
         if (__instance.name == "[Variable] 議會有電嗎")
         {
             __result = true;
             Logger.LogInfo("Overriding variable bool");
         }
+    }
+
+    // Allow teleporting out of prison to prevent softlocks
+    [HarmonyPatch(typeof(PlayerInPrisionCondition), "isValid", MethodType.Getter)]
+    [HarmonyPostfix]
+    static void PlayerInPrisionCondition_ShowInit_Hook(PlayerInPrisionCondition __instance, ref bool __result)
+    {
+        __result = false;
     }
 }
