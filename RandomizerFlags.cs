@@ -70,8 +70,6 @@ namespace NineSolsRandomizer
                 new RandomizerItemData { type = ItemType.KeyItem, displayName = "Rhizomatic Bomb", finalSaveId = "8b04356645160f24ab172496244c34c2ItemData" },
                 new RandomizerItemData { type = ItemType.KeyItem, displayName = "Abandoned Mines Access Token", finalSaveId = "e50d7e80053813c4cae82eae265b9326ItemData" },
 
-                new RandomizerItemData { type = ItemType.Jade, displayName = "Qi Thief Jade", finalSaveId = "7e33977082bec4db5ab349143f89c24fJadeData" },
-                new RandomizerItemData { type = ItemType.Jade, displayName = "Killing Blow Jade", finalSaveId = "3d4bba4f178b946f6a2249c6389aed7bJadeData" },
                 new RandomizerItemData { type = ItemType.Jade, displayName = "Immovable Jade", finalSaveId = "b8fd8e42229824b788bc222b837382f2JadeData" },
                 new RandomizerItemData { type = ItemType.Jade, displayName = "Harness Force Jade", finalSaveId = "a0a2cb6d037ee4d80a74fd447a21682eJadeData" },
                 new RandomizerItemData { type = ItemType.Jade, displayName = "Focus Jade", finalSaveId = "36eb7e7b95e91467191b8f24dbbb5a3eJadeData" },
