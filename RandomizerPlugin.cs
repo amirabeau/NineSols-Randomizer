@@ -446,15 +446,21 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
         }
     }
 
-    //QoL: Activate primordial root node even if the power is off in the pavillion
+    //Patch to change the result of various conditions and alter behavior of state machines
     [HarmonyPatch(typeof(GameFlagPropertyCondition), "isValid", MethodType.Getter)]
     [HarmonyPostfix]
     static void AbstractStateTransition_TransitionConditionValid_Hook(GameFlagPropertyCondition __instance, ref bool __result)
     {
-        if (__instance.name == "[Condition]有電")
+        //QoL: Activate primordial root node even if the power is off in the pavillion
+        if (__instance.name == "[Condition]有電") // Condition checking you've turned on the power
         {
             __result = true;
-            Logger.LogInfo("Overriding transition condition");
+        }
+
+        // Softlock fix: Never close door leading to mystic nymph
+        if (__instance.name == "[Condition] 進過ＡＩ房") // Condition checking you've entered Ruyi's room
+        {
+            __result = false;
         }
     }
 
@@ -470,7 +476,7 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
         }
     }
 
-    // Allow teleporting out of prison to prevent softlocks
+    // Softlock fix: Allow teleporting out of prison
     [HarmonyPatch(typeof(PlayerInPrisionCondition), "isValid", MethodType.Getter)]
     [HarmonyPostfix]
     static void PlayerInPrisionCondition_ShowInit_Hook(PlayerInPrisionCondition __instance, ref bool __result)
