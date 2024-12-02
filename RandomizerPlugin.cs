@@ -44,6 +44,42 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
     private ConfigEntry<bool> randomizeMapChips;
     private ConfigEntry<bool> randomizeRecyclables;
 
+    private bool IsInvalidArrangement(List<RandomizerItemData> sourceItems, List<RandomizerItemData> targetItems)
+    {
+        int mysticNymphIndex = targetItems.FindIndex(item => item.finalSaveId == HelperFlags["ability_mysticnymph"]);
+        int taiChiKickIndex = targetItems.FindIndex(item => item.finalSaveId == HelperFlags["ability_taichikick"]);
+        int unboundedCounterIndex = targetItems.FindIndex(item => item.finalSaveId == HelperFlags["ability_unboundedcounter"]);
+
+        // Check if upgrades require themselves
+        var nymphRequirements = sourceItems[mysticNymphIndex].requirements;
+        var taiChiKickRequirements = sourceItems[taiChiKickIndex].requirements;
+        var ucRequirements = sourceItems[unboundedCounterIndex].requirements;
+
+        if (nymphRequirements.Contains(Requirement.MysticNymph)
+            || taiChiKickRequirements.Contains(Requirement.TaiChiKick)
+            || ucRequirements.Contains(Requirement.UnboundedCounter))
+        {
+            return true;
+        }
+
+        // Check for requirement cycles
+        if (nymphRequirements.Contains(Requirement.TaiChiKick) && taiChiKickRequirements.Contains(Requirement.MysticNymph)
+            || nymphRequirements.Contains(Requirement.UnboundedCounter) && ucRequirements.Contains(Requirement.MysticNymph)
+            || taiChiKickRequirements.Contains(Requirement.UnboundedCounter) && ucRequirements.Contains(Requirement.TaiChiKick))
+        {
+            return true;
+        }
+
+        // 3-way cycle
+        if (nymphRequirements.Contains(Requirement.TaiChiKick) && taiChiKickRequirements.Contains(Requirement.UnboundedCounter) && ucRequirements.Contains(Requirement.MysticNymph)
+            || nymphRequirements.Contains(Requirement.UnboundedCounter) && ucRequirements.Contains(Requirement.TaiChiKick) && taiChiKickRequirements.Contains(Requirement.MysticNymph))
+        {
+            return true;
+        }
+
+        // The seed is good as far as these three upgrades are concerned
+        return false;
+    }
 
     private void GenerateRandomSettings(int seed)
     {
@@ -84,8 +120,16 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
             }
         }
 
+
         System.Random rng = new System.Random(seed);
-        var shuffledRandomItems = enabledRandomizerItems.OrderBy(_ => rng.Next()).ToList();
+        List<RandomizerItemData> shuffledRandomItems;
+        int attempts = 0;
+        do
+        {
+            Logger.LogInfo("Trying to generate item placement. Attempt " + (attempts++).ToString());
+            shuffledRandomItems = enabledRandomizerItems.OrderBy(_ => rng.Next()).ToList();
+
+        } while (IsInvalidArrangement(enabledRandomizerItems, shuffledRandomItems));
 
         for (int i = 0; i < enabledRandomizerItems.Count; i++)
         {
@@ -147,7 +191,7 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
         Logger = base.Logger;
         Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
 
-        Seed = Config.Bind("RandomSeed", "Seed", 3, "Seed that will be used to randomize items. With all settings turned on, default value of 3 will result in a layout beatable without glitches.");
+        Seed = Config.Bind("RandomSeed", "Seed", 0, "Seed that will be used to randomize items");
         UseFixedSeed = Config.Bind("RandomSeed", "UseFixedSeed", true, "If true, the value from Seed will be used. [option for random seed not implemented yet]");
 
 
@@ -193,7 +237,6 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
 
 
         Harmony.CreateAndPatchAll(typeof(NineSolsRandomizerPlugin));
-
 
         HelperFlags = RandomizerFlags.GetHelperFlags();
         GenerateRandomSettings(Seed.Value);
