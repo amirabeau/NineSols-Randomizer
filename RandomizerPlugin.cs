@@ -77,6 +77,18 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
             return true;
         }
 
+        // Don't put the first 3 seals in places that require prison access
+        int kuafuSealIndex = targetItems.FindIndex(item => item.finalSaveId == HelperFlags["seal_kuafu"]);
+        int goumangSealIndex = targetItems.FindIndex(item => item.finalSaveId == HelperFlags["seal_goumang"]);
+        int yanlaoSealIndex = targetItems.FindIndex(item => item.finalSaveId == HelperFlags["seal_yanlao"]);
+        var kuafuRequirements = sourceItems[kuafuSealIndex].requirements;
+        var goumangRequirements = sourceItems[goumangSealIndex].requirements;
+        var yanlaoRequirements = sourceItems[yanlaoSealIndex].requirements;
+        if (kuafuRequirements.Contains(Requirement.Prison) || goumangRequirements.Contains(Requirement.Prison) || yanlaoRequirements.Contains(Requirement.Prison))
+        {
+            return true;
+        }
+
         // The seed is good as far as these three upgrades are concerned
         return false;
     }
