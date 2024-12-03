@@ -81,7 +81,7 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
         return false;
     }
 
-    private void GenerateRandomSettings(int seed)
+    private void GenerateRandomSettings(int seed, bool logSpoiler=false)
     {
         List<RandomizerItemData> enabledRandomizerItems = new List<RandomizerItemData>();
         foreach (var item in RandomizerFlags.GetAllRandomizerItems())
@@ -126,15 +126,17 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
         int attempts = 0;
         do
         {
-            Logger.LogInfo("Trying to generate item placement. Attempt " + (attempts++).ToString());
             shuffledRandomItems = enabledRandomizerItems.OrderBy(_ => rng.Next()).ToList();
-
         } while (IsInvalidArrangement(enabledRandomizerItems, shuffledRandomItems));
 
+        ItemRemap.Clear();
         for (int i = 0; i < enabledRandomizerItems.Count; i++)
         {
             ItemRemap.Add(enabledRandomizerItems[i].finalSaveId, shuffledRandomItems[i].finalSaveId);
-            Logger.LogInfo("Remapping " + enabledRandomizerItems[i].displayName + " to " + shuffledRandomItems[i].displayName);
+            if (logSpoiler)
+            {
+                Logger.LogInfo("Remapping " + enabledRandomizerItems[i].displayName + " to " + shuffledRandomItems[i].displayName);
+            }
         }
     }
 
@@ -191,9 +193,7 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
         Logger = base.Logger;
         Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
 
-        Seed = Config.Bind("RandomSeed", "Seed", 0, "Seed that will be used to randomize items");
-        UseFixedSeed = Config.Bind("RandomSeed", "UseFixedSeed", true, "If true, the value from Seed will be used. [option for random seed not implemented yet]");
-
+        Seed = Config.Bind("RandomSeed", "Seed", 29932, "Seed that will be used to randomize items. Using the default value of 29932 with all settings turned on will result in a vetted seed that can be completed without glitches.");
 
         randomizeAbilities = Config.Bind("RandomizerSettings",
                                             "RandomizeAbilities",
@@ -239,7 +239,7 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
         Harmony.CreateAndPatchAll(typeof(NineSolsRandomizerPlugin));
 
         HelperFlags = RandomizerFlags.GetHelperFlags();
-        GenerateRandomSettings(Seed.Value);
+        GenerateRandomSettings(Seed.Value, true);
     }
 
     [HarmonyPatch(typeof(SaveManager), "Awake")]

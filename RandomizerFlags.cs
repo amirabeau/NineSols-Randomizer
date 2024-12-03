@@ -191,10 +191,10 @@ namespace NineSolsRandomizer
                 new RandomizerItemData{ type = ItemType.MapChips, displayName = "Agricultural Zone Chip", requirements = {Requirement.MysticNymph, Requirement.TaiChiKick}, finalSaveId = "dbde23882967941729f72898668d888eItemData" },
                 new RandomizerItemData{ type = ItemType.MapChips, displayName = "Warehouse Zone Chip", requirements = {Requirement.MysticNymph}, finalSaveId = "1f04b20cba6dd44edb862ed7cac7c8c3ItemData" },
                 new RandomizerItemData{ type = ItemType.MapChips, displayName = "Transmutation Zone Chip", requirements = {Requirement.MysticNymph, Requirement.UnboundedCounter}, finalSaveId = "62c8e43f21bdb4629816759f012f2dc4ItemData" },
-                new RandomizerItemData{ type = ItemType.MapChips, displayName = "Central Core Chip", requirements = {Requirement.MysticNymph}, finalSaveId = "cc2161127ffac40f3900b2338732539cItemData" },
+                new RandomizerItemData{ type = ItemType.MapChips, displayName = "Central Core Chip", requirements = {}, finalSaveId = "cc2161127ffac40f3900b2338732539cItemData" },
                 new RandomizerItemData{ type = ItemType.MapChips, displayName = "Empyrean District Chip", requirements = {Requirement.MysticNymph, Requirement.TaiChiKick}, finalSaveId = "81fd8581688cd4b16947568280181a3eItemData" },
                 new RandomizerItemData{ type = ItemType.MapChips, displayName = "Grotto of Scriptures Chip", requirements = {Requirement.MysticNymph, Requirement.TaiChiKick}, finalSaveId = "15afe59971f8d4ba2ba254aa63fbcccdItemData" },
-                new RandomizerItemData{ type = ItemType.MapChips, displayName = "Research Institute Chip", requirements = {Requirement.MysticNymph, Requirement.TaiChiKick}, finalSaveId = "8cadca0dd118b433996ceff3b40c65f1ItemData" },
+                new RandomizerItemData{ type = ItemType.MapChips, displayName = "Research Institute Chip", requirements = {Requirement.TaiChiKick}, finalSaveId = "8cadca0dd118b433996ceff3b40c65f1ItemData" },
 
                 new RandomizerItemData{ type = ItemType.Recyclables, displayName = "Noble Ring", requirements = {}, finalSaveId = "6be26d51d342d73418ba832be13bc58eItemData" },
                 new RandomizerItemData{ type = ItemType.Recyclables, displayName = "Shuanshuan Coin", requirements = {Requirement.MysticNymph}, finalSaveId = "26ee16f6dab31d544aa70ab3ccd74c27ItemData" },
@@ -233,6 +233,7 @@ namespace NineSolsRandomizer
                 {"ability_mysticnymph", "be31937c6691a44d88d3d70ac2f62cc9PlayerAbilityData"},
                 {"ability_fusanghorn", "f6ddb914baaea4c11a4b995145dbbaadItemData"},
                 {"ability_teleport", "950f8f3273611424d9b42ab209e8cac8PlayerAbilityData"},
+                {"ability_cloudleap", "827cb8277cd144d83861460103607ed7SkillNodeData"},
             };
         }
     }
