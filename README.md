@@ -3,10 +3,13 @@ This is a simple randomizer project for Nine Sols developped as part of a hack d
 
 # Installation
 1. Get the plugin from the latest release
-2. Copy suntzu.NineSolsRandomizer.dll into BepInEx/Plugins
-3. Launch the game and a config file will be created in BepInEx/config
-4. Randomizer settings can only be configured via this file. A game restart is required for any changes to take effect
-5. Randomizer changes apply to all saves so it's recommended to only use this mod with fresh saves (or speedrun start saves)
+2. Switch to the speedrun patch of Nine Sols. This mod will not work with the latest patch. 
+   Guide for switching to the speedrun branch on Steam can be found here: https://coda.io/@redcandlegames/nine-sols-support/switching-branch-28
+3. Install BepInEx and copy it to your Nine Sols installation
+4. Copy suntzu.NineSolsRandomizer.dll into BepInEx/Plugins
+5. Launch the game and a config file will be created in BepInEx/config
+6. Randomizer settings can only be configured via this file. A game restart is required for any changes to take effect
+7. Randomizer changes apply to all saves so it's recommended to only use this mod with fresh saves (or speedrun start saves)
 
 # Build Setup
 1. Create a lib folder and copy Assembly-CSharp.dll, rcg.rcgmakercore.Runtime.dll and Sirenix.OdinInspector.Attributes.dll from your local Nine Sols installation.
