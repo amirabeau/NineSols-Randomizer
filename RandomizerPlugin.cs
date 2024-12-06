@@ -269,7 +269,7 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
     static void LogPlayerPicked(ItemData __instance)
     {
         Logger.LogInfo("Player Picked item: " + __instance.Title);
-        Logger.LogInfo(System.Environment.StackTrace);
+        //Logger.LogInfo(System.Environment.StackTrace);
 
         if (__instance.FinalSaveID == HelperFlags["ability_fusanghorn"])
         {
@@ -329,14 +329,15 @@ public class NineSolsRandomizerPlugin : BaseUnityPlugin
     [HarmonyPrefix]
     static bool PickItemAction_OnStateEnterImplement_Hook(PickItemAction __instance)
     {
-        Logger.LogInfo("Picked item on the ground: " + __instance.pickItemData.Title);
-        Logger.LogInfo("action name: " + __instance.name);
-        Logger.LogInfo("instance id: " + __instance.GetInstanceID());
 
         // Use Traverse to access private field
         ItemProvider itemProvider = Traverse.Create(__instance).Field("itemProvider").GetValue() as ItemProvider;
 
         GameFlagDescriptable gameFlagDescriptable = ((!(itemProvider != null) || !(itemProvider.item != null)) ? __instance.pickItemData : itemProvider.item);
+
+        Logger.LogInfo("Picked item on the ground: " + gameFlagDescriptable.Title);
+        Logger.LogInfo("action name: " + __instance.name);
+        Logger.LogInfo("instance id: " + __instance.GetInstanceID());
 
 
         Logger.LogInfo("GameFlagDescriptable: " + gameFlagDescriptable.FinalSaveID);
